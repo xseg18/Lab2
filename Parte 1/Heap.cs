@@ -2,42 +2,43 @@
 
 namespace Parte_1
 {
-    public class Heap<T, Y> where T: IComparable
-    {
-        internal T[] Queue;
+    public class Heap
+    { 
+        internal Node[] Queue;
         int p;
         internal class Node
         {
             internal Node Right;
             internal Node Left;
             internal Node Parent;
-            T prio;
-            Y Key;
-            internal T Priority
+            internal IHuffman.Node Key;
+            internal IHuffman.Node Keys
             {
-                get => prio;
-                set => prio = value;
+                get => Key;
+                set => Key = value;
             }
         }
         Node root;
-        public Heap(int x)
+        internal Heap(int x)
         {
-            Queue = new T[x];
+            Queue = new Node[x];
             p = 1;
         }
-        public void Add(T value)
+
+        internal void Add(IHuffman.Node value)
         {
             if(root == null)
             {
                 root = new Node();
-                Queue[p] = value;
+                root.Key = value;
+                Queue[p] = root;
                 p++;
             }
             else
             {
                 Node add = FindChild(root);
-                add.Priority = value;
-                Queue[p] = value;
+                add.Key = value;
+                Queue[p] = add;
                 p++;
                 Ordenar(root);
             }
@@ -77,15 +78,79 @@ namespace Parte_1
             {
                 if(raiz.Left != null)
                 {
-                    if(raiz.Priority.CompareTo(raiz.Left.Priority) > 0)
+                    if(raiz.Keys.Prio > raiz.Left.Keys.Prio)
                     {
-                        T prov = raiz.Left.Priority;
-                        raiz.Left.Priority = raiz.;
-                        raiz.Priority = 
+                        IHuffman.Node prov = raiz.Left.Keys;
+                        raiz.Left.Keys = raiz.Keys;
+                        raiz.Keys = prov;
+                        if(raiz != root)
+                        {
+                            Ordenar(raiz.Parent);
+                        }
                     }
                 }
+                else if(raiz.Right != null)
+                {
+                    if (raiz.Keys.Prio > raiz.Right.Keys.Prio)
+                    {
+                        IHuffman.Node prov = raiz.Right.Keys;
+                        raiz.Right.Keys = raiz.Keys;
+                        raiz.Keys = prov;
+                        if (raiz != root)
+                        {
+                            Ordenar(raiz.Parent);
+                        }
+                    }
+                }
+                Ordenar(raiz.Left);
+                Ordenar(raiz.Right);
             }
         }
-        struct 
+        internal Node FindLast()
+        {
+            Node last;
+            if (p -1 != 1)
+            {
+                last = Queue[p - 1];
+                Node parentdata = last.Parent;
+                if ((p - 1) % 2 == 0)
+                {
+                    parentdata.Left = null;
+                    Queue[p - 1] = null;
+                }
+                else
+                {
+                    parentdata.Right = null;
+                    Queue[p - 1] = null;
+                }
+                p--;
+                return last;
+            }
+            else
+            {
+                return root;
+            }
+        }
+        internal IHuffman.Node Pop()
+        {
+            Node pop = root;
+            if(Queue[2].Equals(null))
+            {
+                Node temp = FindLast();
+                root.Key = temp.Key;
+                Ordenar(root);
+            }
+            else
+            {
+                root = null;
+                Queue[1] = null;
+            }
+            return pop.Key;
+        }
+
+        internal int Count()
+        {
+            return p;
+        }
     }
 }
