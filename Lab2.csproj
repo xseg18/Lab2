@@ -6,9 +6,13 @@
 
   <ItemGroup>
     <Compile Remove="Parte 1\**" />
+    <Compile Remove="Parte 2\**" />
     <Content Remove="Parte 1\**" />
+    <Content Remove="Parte 2\**" />
     <EmbeddedResource Remove="Parte 1\**" />
+    <EmbeddedResource Remove="Parte 2\**" />
     <None Remove="Parte 1\**" />
+    <None Remove="Parte 2\**" />
   </ItemGroup>
 
   <ItemGroup>

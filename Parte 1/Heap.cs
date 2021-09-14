@@ -11,7 +11,7 @@ namespace Parte_1
             internal Node Right;
             internal Node Left;
             internal Node Parent;
-            internal IHuffman.Node Key;
+            IHuffman.Node Key;
             internal IHuffman.Node Keys
             {
                 get => Key;
@@ -21,7 +21,7 @@ namespace Parte_1
         Node root;
         internal Heap(int x)
         {
-            Queue = new Node[x];
+            Queue = new Node[x + 1];
             p = 1;
         }
 
@@ -30,127 +30,116 @@ namespace Parte_1
             if(root == null)
             {
                 root = new Node();
-                root.Key = value;
+                root.Keys = value;
                 Queue[p] = root;
                 p++;
             }
             else
             {
-                Node add = FindChild(root);
-                add.Key = value;
-                Queue[p] = add;
-                p++;
-                Ordenar(root);
-            }
-        }
-
-        Node FindChild(Node raiz)
-        {
-            
-            if(raiz.Left == null)
-            {
-                raiz.Left = new Node();
-                raiz.Left.Parent = raiz;
-                return raiz.Left;
-            }
-            else if(raiz.Right == null)
-            {
-                raiz.Right = new Node();
-                raiz.Right.Parent = raiz;
-                return raiz.Right;
-            }
-            else
-            {
-                if(FindChild(raiz.Left) != null)
+                Node add = new Node
                 {
-                    return FindChild(raiz.Left);
-                } 
-                else if(FindChild(raiz.Right) != null)
+                    Keys = value
+                };
+                //hijo izquierdo
+                if(p%2 == 0)
                 {
-                    return FindChild(raiz.Right);
-                }
-            }
-            return null;
-        }
-        void Ordenar(Node raiz)
-        {
-            if(raiz != null)
-            {
-                if(raiz.Left != null)
-                {
-                    if(raiz.Keys.Prio > raiz.Left.Keys.Prio)
-                    {
-                        IHuffman.Node prov = raiz.Left.Keys;
-                        raiz.Left.Keys = raiz.Keys;
-                        raiz.Keys = prov;
-                        if(raiz != root)
-                        {
-                            Ordenar(raiz.Parent);
-                        }
-                    }
-                }
-                else if(raiz.Right != null)
-                {
-                    if (raiz.Keys.Prio > raiz.Right.Keys.Prio)
-                    {
-                        IHuffman.Node prov = raiz.Right.Keys;
-                        raiz.Right.Keys = raiz.Keys;
-                        raiz.Keys = prov;
-                        if (raiz != root)
-                        {
-                            Ordenar(raiz.Parent);
-                        }
-                    }
-                }
-                Ordenar(raiz.Left);
-                Ordenar(raiz.Right);
-            }
-        }
-        internal Node FindLast()
-        {
-            Node last;
-            if (p -1 != 1)
-            {
-                last = Queue[p - 1];
-                Node parentdata = last.Parent;
-                if ((p - 1) % 2 == 0)
-                {
-                    parentdata.Left = null;
-                    Queue[p - 1] = null;
+                    Queue[p / 2].Left = add;
+                    add.Parent = Queue[p / 2];
                 }
                 else
                 {
-                    parentdata.Right = null;
-                    Queue[p - 1] = null;
+                    Queue[p / 2].Right = add;
+                    add.Parent = Queue[p / 2];
                 }
-                p--;
-                return last;
-            }
-            else
-            {
-                return root;
+                Queue[p] = add;
+                Ordenar(p);
+                p++;
             }
         }
+
+       
+        void Ordenar(int x)
+        {
+            if (Queue[x] != null)
+            {
+                if (Queue[x].Keys.Prio < Queue[x/2].Keys.Prio)
+                {
+                    IHuffman.Node prov = Queue[x].Keys;
+                    Queue[x].Keys = Queue[x/2].Keys;
+                    Queue[x / 2].Keys = prov;
+                    if (x/2 != 1)
+                    {
+                        Ordenar(x / 2);
+                    }
+                }
+            }    
+        }
+
+        void OrdenarRaiz(int x)
+        {
+            //hijo izquierdo y que hijo izquierdo sea menor que hijo derecho
+            if (Queue[(x * 2) + 1] != null)
+            {
+                if (Queue[x * 2].Keys.Prio < Queue[x].Keys.Prio && Queue[(x * 2) + 1].Keys.Prio >= Queue[x * 2].Keys.Prio)
+                {
+                    IHuffman.Node prov = Queue[x].Keys;
+                    Queue[x].Keys = Queue[x * 2].Keys;
+                    Queue[x * 2].Keys = prov;
+                    if ((x * 2) * 2 < p || ((x * 2) * 2) + 1 < p)
+                    {
+                        OrdenarRaiz(x * 2);
+                    }
+                }
+                else if (Queue[(x * 2) + 1].Keys.Prio < Queue[x].Keys.Prio)
+                {
+                    IHuffman.Node prov = Queue[x].Keys;
+                    Queue[x].Keys = Queue[(x * 2) + 1].Keys;
+                    Queue[(x * 2) + 1].Keys = prov;
+                    if (((x * 2) + 1) * 2 < p || (((x * 2) + 1) * 2) + 1 < p)
+                    {
+                        OrdenarRaiz((x * 2) + 1);
+                    }
+                }
+            }
+            else if(Queue[(x * 2) + 1] == null)
+            {
+                if (Queue[x * 2].Keys.Prio < Queue[x].Keys.Prio)
+                {
+                    IHuffman.Node prov = Queue[x].Keys;
+                    Queue[x].Keys = Queue[x * 2].Keys;
+                    Queue[x * 2].Keys = prov;
+                    if ((x * 2) * 2 < p || ((x * 2) * 2) + 1 < p)
+                    {
+                        OrdenarRaiz(x * 2);
+                    }
+                }
+            }
+        }
+
         internal IHuffman.Node Pop()
         {
-            Node pop = root;
-            if(Queue[2].Equals(null))
+            IHuffman.Node pop = root.Keys;
+            if(Queue[2] != null)
             {
-                Node temp = FindLast();
-                root.Key = temp.Key;
-                Ordenar(root);
+                Queue[1].Keys = Queue[p - 1].Keys;
+                Queue[p - 1] = null;
+                p--;
+                if(p > 2)
+                {
+                    OrdenarRaiz(1);
+                }
             }
             else
             {
+                p = 1;
                 root = null;
-                Queue[1] = null;
             }
-            return pop.Key;
+            return pop;
         }
 
         internal int Count()
         {
-            return p;
+            return p - 1;
         }
     }
 }
