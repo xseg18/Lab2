@@ -9,7 +9,7 @@ namespace Lab3
     public interface ILZW
     {
         public string Comprimir(string compress);
-        //public string Descomprimir(string decompress);
+        public string Descomprimir(string decompress);
     }
     public class ImplementationClassL : ILZW
     {
@@ -18,7 +18,6 @@ namespace Lab3
             //atributos
             int nbytes = 0;
             int origdic = 0;
-            int key = 1;
             string salida = "";
             List<int> comp = new List<int>();
             string w = "";
@@ -28,11 +27,10 @@ namespace Lab3
             {
                 if (!Leyenda.ContainsKey(compress[i].ToString()))
                 {
-                    Leyenda.Add(compress[i].ToString(), key);
-                    key++;
+                    Leyenda.Add(compress[i].ToString(), i + 1);
                 }
             }
-            origdic = key;
+            origdic = Leyenda.Count();
             //compresión
             foreach(char k in compress)
             {
@@ -44,10 +42,15 @@ namespace Lab3
                 else
                 {
                     comp.Add(Leyenda[w]);
-                    Leyenda.Add(wk, Leyenda.Count);
+                    Leyenda.Add(wk, Leyenda.Count + 1);
                     w = k.ToString();
                 }
             }
+            if (!string.IsNullOrEmpty(w))
+            {
+                comp.Add(Leyenda[w]);
+            }
+
             //lectura de bits 
             nbytes = Convert.ToInt32(Math.Log(Leyenda.Count, 2));
             //composición inicial de salida
@@ -78,8 +81,28 @@ namespace Lab3
                     bfin = codes[i].ToString();
                 }
             }
+            if (!string.IsNullOrEmpty(bfin))
+            {
+                while (bfin.Length < 8)
+                {
+                    bfin += 0;
+                }
+                long B = Convert.ToInt32(bfin);
+                salida += Convert.ToChar(BinDec(B));
+            }
             return salida;
         }
+
+        public string Descomprimir(string decompress)
+        {
+            //atributos
+            int nbytes = 0;
+            int origdic = 0;
+            string salida = "";
+
+            return salida;
+        }
+
         string DecBin(int decim, int m)
         {
             long bin = 0;
@@ -97,6 +120,7 @@ namespace Lab3
             }
             return Bin;
         }
+
         int BinDec(long binary)
         {
 
