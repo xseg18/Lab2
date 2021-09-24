@@ -8,12 +8,12 @@ namespace Lab3
 {
     public interface ILZW
     {
-        public string Comprimir(string compress);
+        public string Comprimir(string uncompressed);
         public string Descomprimir(string decompress);
     }
     public class ImplementationClassL : ILZW
     {
-        public string Comprimir(string compress)
+        public string Comprimir(string uncompressed)
         {
             //atributos
             int nbytes = 0;
@@ -23,16 +23,16 @@ namespace Lab3
             string w = "";
             Dictionary<string, int> Leyenda = new Dictionary<string, int>();
             //llenamos diccionario
-            for (int i = 0; i < compress.Length; i++)
+            for (int i = 0; i < uncompressed.Length; i++)
             {
-                if (!Leyenda.ContainsKey(compress[i].ToString()))
+                if (!Leyenda.ContainsKey(uncompressed[i].ToString()))
                 {
-                    Leyenda.Add(compress[i].ToString(), i + 1);
+                    Leyenda.Add(uncompressed[i].ToString(), Leyenda.Count + 1);
                 }
             }
             origdic = Leyenda.Count();
             //compresión
-            foreach(char k in compress)
+            foreach(char k in uncompressed)
             {
                 string wk = w + k;
                 if (Leyenda.ContainsKey(wk))
@@ -93,13 +93,50 @@ namespace Lab3
             return salida;
         }
 
-        public string Descomprimir(string decompress)
+        public string Descomprimir(string compressed)
         {
             //atributos
-            int nbytes = 0;
-            int origdic = 0;
-            string salida = "";
-
+            int nbytes = Convert.ToInt32(compressed[0]);
+            int origdic = Convert.ToInt32(compressed[1]);
+            string codes = string.Empty;
+            string salida = string.Empty;
+            List<int> comp = new List<int>();
+            string w;
+            Dictionary<int, string> Leyenda = new Dictionary<int, string>();
+            for (int i = 0; i < origdic; i++)
+            {
+                Leyenda.Add(Leyenda.Count + 1, compressed.Substring(2, origdic)[i].ToString());
+            }
+            foreach (char item in compressed.Substring(2 + origdic))
+            {
+                codes += DecBin(item, 8);
+            }
+            while (!string.IsNullOrEmpty(codes) && codes.Length >= nbytes)
+            {
+                comp.Add(Convert.ToInt32(codes.Substring(0, nbytes), 2));
+                codes = codes.Substring(nbytes);
+            }
+            w = Leyenda[comp[0]];
+            comp.RemoveAt(0);
+            salida += w;
+            foreach (var item in comp)
+            {
+                if (item != 0)
+                {
+                    string k = "";
+                    if (Leyenda.ContainsKey(item))
+                    {
+                        k = Leyenda[item];
+                    }
+                    else if (item == Leyenda.Count)
+                    {
+                        k = w + w[0];
+                    }
+                    salida += k;
+                    Leyenda.Add(Leyenda.Count + 1, w + k[0]);
+                    w = k; 
+                }
+            }
             return salida;
         }
 

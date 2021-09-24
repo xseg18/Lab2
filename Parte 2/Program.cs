@@ -13,11 +13,13 @@ namespace Parte_2
             //string prueba = h.Comprimir("Cuando cuentes cuentos, cuenta cuántos cuentos cuentas; porque si no cuentas cuántos cuentos cuentas, nunca sabrás cuántos cuentos cuentas tú");
             //string prueba2 = h.Descomprimir(prueba);
             ILZW lzw = new ImplementationClassL();
-            string d = lzw.Comprimir("WABBAWABBAWABBAWABBA");
+            string d = lzw.Comprimir("Como poco coco como\npoco coco compro\nComo compro poco coco\npoco coco como");
+            string r = lzw.Descomprimir(d);
             int prueba = d.Length;
-            double fileCount = Convert.ToDouble(Encoding.UTF8.GetByteCount("WABBAWABBAWABBAWABBA"));
+            double fileCount = Convert.ToDouble(Encoding.UTF8.GetByteCount("Como poco coco como\npoco coco compro\nComo compro poco coco\npoco coco como"));
             double compressedCount = Convert.ToDouble(Encoding.ASCII.GetByteCount(d));
             //Como poco coco como\npoco coco compro\nComo compro poco coco\npoco coco como
+            //WABBAWABBAWABBAWABBA
         }
     }
 }
