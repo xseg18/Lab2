@@ -99,7 +99,6 @@ namespace Lab3
         }
         int BinDec(long binary)
         {
-
             int decim = 0;
             int digit = 0;
             const int div = 10;
