@@ -52,7 +52,7 @@ namespace Lab3
             }
 
             //lectura de bits 
-            nbytes = Convert.ToInt32(Math.Log(Leyenda.Count, 2));
+            nbytes = Convert.ToInt32((uint)Math.Log(Leyenda.Count, 2.0) + 1);
             //composición inicial de salida
             salida += Convert.ToChar(nbytes);
             salida += Convert.ToChar(origdic);
@@ -175,5 +175,16 @@ namespace Lab3
             }
             return decim;
         }
+
+        //int countBits(int n)
+        //{
+        //    int i = 0;
+        //    while (n != 0)
+        //    {
+        //        i++;
+        //        n >>= 1;
+        //    }
+        //    return i;
+        //}
     }
 }
