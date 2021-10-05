@@ -29,7 +29,7 @@ namespace Parte_1
                 set => Symbol = value;
             }
             //recorrido para código prefijo
-            internal List<bool> Recorrido(Node search, List<bool> binary)
+            internal List<char> Recorrido(Node search, List<char> binary)
             {
                 if(search != null)
                 {
@@ -39,7 +39,7 @@ namespace Parte_1
                         {
                             Recorrido(search.Parent, binary);
                         }
-                        binary.Add(false);
+                        binary.Add('0');
                     }
                     else
                     {
@@ -47,7 +47,7 @@ namespace Parte_1
                         {
                             Recorrido(search.Parent, binary);
                         }
-                        binary.Add(true);
+                        binary.Add('1');
                     }
                     return binary;
                 }
@@ -124,7 +124,7 @@ namespace Parte_1
                 PrioHeap.Add(Parent);
             }
             //código binario de todo el árbol
-            List<bool> binary = new List<bool>();
+            List<char> binary = new List<char>();
             for (int i = 0; i < compress.Length; i++)
             {
                 IHuffman.Node s = Parent.Find(compress[i], Parent);
@@ -143,12 +143,11 @@ namespace Parte_1
             string p = "";
             for (int i = 0; i < binary.Count; i++)
             {
-                p+= BitConverter.ToString(BitConverter.GetBytes(binary[i]));
-                if(p.Length >= 8)
+                p+= binary[i];
+                if(p.Length == 8)
                 {
-                    string x = p.Substring(0, 8);
-                    p = p.Remove(0,8);
-                    final += Convert.ToChar(BinDec(Convert.ToInt32(x)));
+                    final += Convert.ToChar(BinDec(Convert.ToInt32(p)));
+                    p = "";
                 }
             }
             if(p != "")
@@ -159,6 +158,7 @@ namespace Parte_1
                 }
                 final += Convert.ToChar(BinDec(Convert.ToInt32(p)));
             }
+            int x = final.Length;
             return final;
         }
         string IHuffman.Descomprimir(string decompress)
@@ -214,12 +214,12 @@ namespace Parte_1
             for (int i = 0; i < par.Length - 1; i++)
             {
                 IHuffman.Node found = Parent.Find(par[i][0], Parent);
-                List<bool> binary = new List<bool>();
+                List<char> binary = new List<char>();
                 Parent.Recorrido(found, binary);
                 string path = "";
                 for (int j = 0; j < binary.Count; j++)
                 {
-                    path += BitConverter.ToString(BitConverter.GetBytes(binary[j]));
+                    path += binary[j];
                 }
                 Prefix.Add(par[i][0], path); 
             }
