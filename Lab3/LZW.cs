@@ -8,61 +8,57 @@ namespace Lab3
 {
     public interface ILZW
     {
-        public byte[] Comprimir(byte[] uncompressed);
-        public byte[] Descomprimir(byte[] decompress);
+        public string Comprimir(string uncompressed);
+        public string Descomprimir(string decompress);
     }
     public class ImplementationClassL : ILZW
     {
-        public byte[] Comprimir(byte[] uncompressed)
+        public string Comprimir(string uncompressed)
         {
             //atributos
             int nbytes = 0;
-            List<byte> salida = new List<byte>(); 
+            int origdic = 0;
+            string salida = "";
             List<int> comp = new List<int>();
-            byte[] w = new byte[1];
-            Dictionary<byte, int> Leyenda = new Dictionary<byte, int>();
+            string w = "";
+            Dictionary<string, int> Leyenda = new Dictionary<string, int>();
             //llenamos diccionario
             for (int i = 0; i < uncompressed.Length; i++)
             {
-                if (!Leyenda.ContainsKey(uncompressed[i]))
+                if (!Leyenda.ContainsKey(uncompressed[i].ToString()))
                 {
-                    Leyenda.Add(uncompressed[i], Leyenda.Count + 1);
+                    Leyenda.Add(uncompressed[i].ToString(), Leyenda.Count + 1);
                 }
             }
+            origdic = Leyenda.Count();
             //compresión
-            Dictionary<byte[], int> Combinaciones = new Dictionary<byte[], int>();
-            //tamaño del diccionario 
-            int copydic = Leyenda.Count;
-            foreach(byte k in uncompressed)
+            foreach(char k in uncompressed)
             {
-                byte[] wk = new byte[1];
-                wk.Concat(w);
-                wk.Append(k);
-                wk.ToArray();
-                if (Combinaciones.ContainsKey(wk))
+                string wk = w + k;
+                if (Leyenda.ContainsKey(wk))
                 {
                     w = wk;
                 }
                 else
                 {
-                    comp.Add(Combinaciones[w]);
-                    Combinaciones.Add(wk, copydic++);
-                    w = null;
-                    w[0] = k;
+                    comp.Add(Leyenda[w]);
+                    Leyenda.Add(wk, Leyenda.Count + 1);
+                    w = k.ToString();
                 }
             }
-            if (w == null)
+            if (!string.IsNullOrEmpty(w))
             {
-                comp.Add(Combinaciones[w]);
+                comp.Add(Leyenda[w]);
             }
+
             //lectura de bits 
-            nbytes = Convert.ToInt32((uint)Math.Log(Leyenda.Count + Combinaciones.Count, 2.0) + 1);
+            nbytes = Convert.ToInt32((uint)Math.Log(Leyenda.Count, 2.0) + 1);
             //composición inicial de salida
-            salida.Add(Convert.ToByte(nbytes));
-            salida.Add(Convert.ToByte(Leyenda.Count));
-            for (int i = 1; i <= Leyenda.Count; i++)
+            salida += Convert.ToChar(nbytes);
+            salida += Convert.ToChar(origdic);
+            for (int i = 1; i <= origdic; i++)
             {
-                salida.Add(Leyenda.FirstOrDefault( x => x.Value == i ).Key);
+                salida += Leyenda.FirstOrDefault( x => x.Value == i ).Key;
             }
             //de decimal a binario
             string codes = "";
@@ -81,7 +77,7 @@ namespace Lab3
                 else
                 {
                     long B = Convert.ToInt32(bfin);
-                    salida.Add(Convert.ToByte(BinDec(B)));
+                    salida += Convert.ToChar(BinDec(B));
                     bfin = codes[i].ToString();
                 }
             }
@@ -92,9 +88,9 @@ namespace Lab3
                     bfin += 0;
                 }
                 long B = Convert.ToInt32(bfin);
-                salida.Add(Convert.ToByte(BinDec(B)));
+                salida += Convert.ToChar(BinDec(B));
             }
-            return salida.ToArray();
+            return salida;
         }
 
         public string Descomprimir(string compressed)
