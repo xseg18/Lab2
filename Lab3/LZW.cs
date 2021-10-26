@@ -8,63 +8,72 @@ namespace Lab3
 {
     public interface ILZW
     {
-        public string Comprimir(string uncompressed);
-        public string Descomprimir(string decompress);
+        public byte[] Compress(byte[] bytes);
+        public byte[] Decompress(byte[] bytes);
     }
     public class ImplementationClassL : ILZW
     {
-        public string Comprimir(string uncompressed)
+        public byte[] Compress(byte[] bytes)
         {
             //atributos
-            int nbytes = 0;
-            int origdic = 0;
-            string salida = "";
+            int byteQty = 0;
+            int origDict = 0;
             List<int> comp = new List<int>();
-            string w = "";
-            Dictionary<string, int> Leyenda = new Dictionary<string, int>();
+            List<byte> output = new List<byte>();
+            Dictionary<string, int> Legend = new Dictionary<string, int>();
             //llenamos diccionario
-            for (int i = 0; i < uncompressed.Length; i++)
+            for (int i = 0; i < bytes.Length; i++)
             {
-                if (!Leyenda.ContainsKey(uncompressed[i].ToString()))
+                if (!Legend.ContainsKey(((char)bytes[i]).ToString()))
                 {
-                    Leyenda.Add(uncompressed[i].ToString(), Leyenda.Count + 1);
+                    Legend.Add(((char)bytes[i]).ToString(), Legend.Count + 1);
                 }
             }
-            origdic = Leyenda.Count();
+            origDict = Legend.Count;
             //compresión
-            foreach(char k in uncompressed)
+            string w = "";
+            foreach(char k in bytes)
             {
                 string wk = w + k;
-                if (Leyenda.ContainsKey(wk))
+                if (Legend.ContainsKey(wk))
                 {
                     w = wk;
                 }
                 else
                 {
-                    comp.Add(Leyenda[w]);
-                    Leyenda.Add(wk, Leyenda.Count + 1);
+                    comp.Add(Legend[w]);
+                    Legend.Add(wk, Legend.Count + 1);
                     w = k.ToString();
                 }
             }
             if (!string.IsNullOrEmpty(w))
             {
-                comp.Add(Leyenda[w]);
+                comp.Add(Legend[w]);
             }
 
             //lectura de bits 
-            nbytes = Convert.ToInt32((uint)Math.Log(Leyenda.Count, 2.0) + 1);
+            byteQty = Convert.ToInt32((uint)Math.Log(Legend.Count, 2.0) + 1);
             //composición inicial de salida
-            salida += Convert.ToChar(nbytes);
-            salida += Convert.ToChar(origdic);
-            for (int i = 1; i <= origdic; i++)
+            output.Add((byte)byteQty);
+            output.Add((byte)origDict);
+            int c = 0;
+            foreach (var item in Legend.Keys)
             {
-                salida += Leyenda.FirstOrDefault( x => x.Value == i ).Key;
+                if (origDict > c)
+                {
+                    output.Add((byte)item[0]);
+                    c++;
+                }
+                else
+                {
+                    break;
+                }
             }
             //de decimal a binario
             string codes = "";
-            foreach(int y in comp)
+            foreach(var item in comp)
             {
-                codes += DecBin(y, nbytes);
+                codes += DecBin(item, byteQty);
             }
             //reagrupación de bytes
             string bfin = "";
@@ -77,7 +86,7 @@ namespace Lab3
                 else
                 {
                     long B = Convert.ToInt32(bfin);
-                    salida += Convert.ToChar(BinDec(B));
+                    output.Add((byte)BinDec(B));
                     bfin = codes[i].ToString();
                 }
             }
@@ -88,56 +97,67 @@ namespace Lab3
                     bfin += 0;
                 }
                 long B = Convert.ToInt32(bfin);
-                salida += Convert.ToChar(BinDec(B));
+                output.Add((byte)BinDec(B));
             }
-            return salida;
+            return output.ToArray();
         }
 
-        public string Descomprimir(string compressed)
+        public byte[] Decompress(byte[] bytes)
         {
             //atributos
-            int nbytes = Convert.ToInt32(compressed[0]);
-            int origdic = Convert.ToInt32(compressed[1]);
+            int bytesQty = Convert.ToInt32(bytes[0]);
+            int origDict = Convert.ToInt32(bytes[1]);
             string codes = string.Empty;
-            string salida = string.Empty;
+            string Out = string.Empty;
             List<int> comp = new List<int>();
-            string w;
-            Dictionary<int, string> Leyenda = new Dictionary<int, string>();
-            for (int i = 0; i < origdic; i++)
+            List<byte> output = new List<byte>();
+            Dictionary<int, string> Legend = new Dictionary<int, string>();
+            for (int i = 0; i < origDict; i++)
             {
-                Leyenda.Add(Leyenda.Count + 1, compressed.Substring(2, origdic)[i].ToString());
+                Legend.Add(Legend.Count + 1, ((char)bytes[2 + i]).ToString());
             }
-            foreach (char item in compressed.Substring(2 + origdic))
+            for (int i = 2 + origDict; i < bytes.Length; i++)
             {
-                codes += DecBin(item, 8);
+                codes += DecBin(bytes[i], 8);
             }
-            while (!string.IsNullOrEmpty(codes) && codes.Length >= nbytes)
+            while (!string.IsNullOrEmpty(codes) && codes.Length >= bytesQty)
             {
-                comp.Add(Convert.ToInt32(codes.Substring(0, nbytes), 2));
-                codes = codes.Substring(nbytes);
+                comp.Add(Convert.ToInt32(codes.Substring(0, bytesQty), 2));
+                codes = codes.Substring(bytesQty);
             }
-            w = Leyenda[comp[0]];
+            string w = Legend[comp[0]];
+            int p = comp[0];
             comp.RemoveAt(0);
-            salida += w;
+            Out += w;
+            string k = "";
             foreach (var item in comp)
             {
                 if (item != 0)
                 {
-                    string k = "";
-                    if (Leyenda.ContainsKey(item))
+                    if (!Legend.ContainsKey(item))
                     {
-                        k = Leyenda[item];
+                        k = Legend[p];
+                        k = k + w;
                     }
-                    else if (item == Leyenda.Count)
+                    else
                     {
-                        k = w + w[0];
+                        k = Legend[item];
                     }
-                    salida += k;
-                    Leyenda.Add(Leyenda.Count + 1, w + k[0]);
-                    w = k; 
+                    Out += k;
+                    w = k.Substring(0, 1);
+                    Legend.Add(Legend.Count + 1, Legend[p] + w);
+                    p = item;
+                }
+                else
+                {
+                    break;
                 }
             }
-            return salida;
+            foreach (var item in Out)
+            {
+                output.Add((byte)item);
+            }
+            return output.ToArray();
         }
 
         string DecBin(int decim, int m)
