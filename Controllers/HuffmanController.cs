@@ -55,7 +55,7 @@ namespace Lab2.Controllers
                             factor = Convert.ToDouble(readBytes.Length) / Convert.ToDouble(compressedBytes.Length),
                             percentage = Convert.ToString(Convert.ToDouble(compressedBytes.Length) / Convert.ToDouble(readBytes.Length) * 100) + "%"
                         };
-                        System.IO.File.WriteAllBytes(name + ".lzw", readBytes);
+                        System.IO.File.WriteAllBytes(name + ".lzw", compressedBytes);
                         Singleton.Instance.Compressions.Add(newCompression);
                         return Ok("Archivo comprimido en: " + Environment.CurrentDirectory);
                     }
